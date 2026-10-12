@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Outer glow / pulse ring -->
+    <path
+        android:fillColor="#1A6366F1"
+        android:pathData="M48,48m-44,0a44,44 0,1 1,88 0a44,44 0,1 1,-88 0" />
+    <!-- Main circle -->
+    <path
+        android:fillColor="#6366F1"
+        android:pathData="M48,48m-36,0a36,36 0,1 1,72 0a36,36 0,1 1,-72 0" />
+    <!-- Lightning bolt rush icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52,24 L32,50 L46,50 L42,72 L64,44 L50,44 Z" />
+</vector>
