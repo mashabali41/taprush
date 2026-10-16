@@ -95,7 +95,7 @@ public abstract class BaseAuthActivity extends AppCompatActivity {
                                 .set(userData, SetOptions.merge())
                                 .addOnCompleteListener(dbTask -> {
                                     setLoading(false);
-                                    openGameActivity();
+                                    openGameActivity(finalName);
                                 });
                     } else {
                         setLoading(false);
@@ -105,11 +105,18 @@ public abstract class BaseAuthActivity extends AppCompatActivity {
                 });
     }
 
-    protected void openGameActivity() {
+    protected void openGameActivity(@Nullable String displayName) {
         Intent intent = new Intent(this, GameActivity.class);
+        if (displayName != null && !displayName.trim().isEmpty()) {
+            intent.putExtra("user_name", displayName.trim());
+        }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    protected void openGameActivity() {
+        openGameActivity(null);
     }
 
     protected abstract void setLoading(boolean isLoading);

@@ -1,5 +1,6 @@
 package com.example.taprush;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
@@ -50,7 +51,12 @@ public class SignUpActivity extends BaseAuthActivity {
 
         btnGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
 
-        tvGoToLogin.setOnClickListener(v -> finish());
+        tvGoToLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void performSignUp() {
@@ -106,6 +112,9 @@ public class SignUpActivity extends BaseAuthActivity {
                                 .build();
 
                         user.updateProfile(profileUpdates).addOnCompleteListener(profileTask -> {
+                            // Reload user in background so display name is instantly refreshed
+                            user.reload();
+
                             Map<String, Object> userData = new HashMap<>();
                             userData.put("name", name);
                             userData.put("highScore", 0L);
@@ -114,8 +123,13 @@ public class SignUpActivity extends BaseAuthActivity {
                                     .set(userData, SetOptions.merge())
                                     .addOnCompleteListener(dbTask -> {
                                         setLoading(false);
-                                        Toast.makeText(SignUpActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
-                                        openGameActivity();
+                                        if (dbTask.isSuccessful()) {
+                                            Toast.makeText(SignUpActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            String error = dbTask.getException() != null ? dbTask.getException().getMessage() : "Sync pending";
+                                            Toast.makeText(SignUpActivity.this, "Account created (Note: " + error + ")", Toast.LENGTH_LONG).show();
+                                        }
+                                        openGameActivity(name);
                                     });
                         });
                     } else {

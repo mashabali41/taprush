@@ -69,6 +69,14 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setupUserHeader(FirebaseUser user) {
+        // Priority 1: Check if name was passed directly from SignUp / Login intent
+        String passedName = getIntent() != null ? getIntent().getStringExtra("user_name") : null;
+        if (passedName != null && !passedName.trim().isEmpty()) {
+            tvGreeting.setText("Hi, " + passedName.trim());
+            return;
+        }
+
+        // Priority 2: Use FirebaseUser displayName
         String displayName = user.getDisplayName();
         if (displayName != null && !displayName.trim().isEmpty()) {
             tvGreeting.setText("Hi, " + displayName.trim());
@@ -77,6 +85,14 @@ public class GameActivity extends AppCompatActivity {
         } else {
             tvGreeting.setText("Hi, Player");
         }
+
+        // Reload user profile in background
+        user.reload().addOnSuccessListener(unused -> {
+            FirebaseUser refreshed = mAuth.getCurrentUser();
+            if (refreshed != null && refreshed.getDisplayName() != null && !refreshed.getDisplayName().trim().isEmpty()) {
+                tvGreeting.setText("Hi, " + refreshed.getDisplayName().trim());
+            }
+        });
     }
 
     private void loadUserDataFromFirestore(String uid) {
@@ -161,8 +177,19 @@ public class GameActivity extends AppCompatActivity {
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
+
+        // 1. Sign out from Firebase Auth
         mAuth.signOut();
-        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> navigateToLogin());
+
+        // 2. Safely trigger Google Sign Out without blocking navigation
+        if (mGoogleSignInClient != null) {
+            try {
+                mGoogleSignInClient.signOut();
+            } catch (Exception ignored) {}
+        }
+
+        // 3. Immediately return to Login screen
+        navigateToLogin();
     }
 
     private void navigateToLogin() {
